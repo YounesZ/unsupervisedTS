@@ -271,8 +271,15 @@ class TimeSeriesEncoderClassifier(sklearn.base.BaseEstimator,
                 loss.backward()
                 self.optimizer_supervised.step()
                 i += 1
-
+		# log the running loss
+                self.writer.add_scalar('encoder training loss', loss.item(), i)
                 running_loss += loss.item()
+                # Update best encoder
+                if loss.item()<best_loss:
+                    best_loss = loss.item()
+                    save_path = os.path.join(self.writer.log_dir, 'saved_models', 'best')
+                    self.save_encoder(save_path)
+
                 frequency = round(len(X)/10)
                 if frequency < 10:
                     frequency = 10
